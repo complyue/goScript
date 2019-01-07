@@ -238,6 +238,9 @@ func createContext(context interface{}) Context {
 
 //Evaluates all kinds of ast node types
 func eval(expr ast.Node, context Context) (interface{}, error) {
+	if stmt, ok := expr.(*ast.ExprStmt); ok {
+		expr = stmt.X
+	}
 	//fmt.Println(reflect.TypeOf(expr), time.Now().UnixNano()/int64(10000), expr)
 	switch expr.(type) {
 	/*
@@ -293,8 +296,6 @@ func eval(expr ast.Node, context Context) (interface{}, error) {
 				return nil, fmt.Errorf("%s not suported", reflect.TypeOf(expr))
 			case *ast.Ellipsis:
 				return nil, fmt.Errorf("%s not suported", reflect.TypeOf(expr))
-			case *ast.EmptyStmt:
-				return nil, fmt.Errorf("%s not suported", reflect.TypeOf(expr))
 			case *ast.Field:
 				return nil, fmt.Errorf("%s not suported", reflect.TypeOf(expr))
 			case *ast.FieldList:
@@ -308,8 +309,6 @@ func eval(expr ast.Node, context Context) (interface{}, error) {
 			case *ast.FuncType:
 				return nil, fmt.Errorf("%s not suported", reflect.TypeOf(expr))
 			case *ast.GenDecl:
-				return nil, fmt.Errorf("%s not suported", reflect.TypeOf(expr))
-			case *ast.GoStmt:
 				return nil, fmt.Errorf("%s not suported", reflect.TypeOf(expr))
 		*/
 	case *ast.Ident:
@@ -374,6 +373,10 @@ func eval(expr ast.Node, context Context) (interface{}, error) {
 			case *ast.ValueSpec:
 				return nil, fmt.Errorf("%s not suported", reflect.TypeOf(expr))
 		*/
+	case *ast.EmptyStmt:
+		return nil, nil // silently ignore empty stmt
+	case *ast.GoStmt:
+		return nil, evalGoCallExpr(expr.(*ast.GoStmt).Call, context)
 	default:
 		return nilInterf, fmt.Errorf("Default %s not suported", reflect.TypeOf(expr))
 	}

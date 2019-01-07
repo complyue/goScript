@@ -87,6 +87,32 @@ func evalCallExpr(expr *ast.CallExpr, context Context) (interface{}, error) {
 	return val, err
 }
 
+func evalGoCallExpr(expr *ast.CallExpr, context Context) error {
+
+	//Find the type called, this calls evalSelectorExpr/ evalIdent
+	val, callsite, err := evalFromCall(expr.Fun, context)
+
+	if err == nil {
+
+		var method reflect.Value
+		var callable Callable
+
+		//Get method to call, a callable or a reflect method
+		method, callable, err = getMethodToCall(val, callsite)
+
+		//Call
+		if err == nil {
+			if callable != nil {
+				go evalCallExprCallable(expr, context, callable)
+			} else {
+				go evalCallExprReflect(expr, context, method)
+			}
+		}
+	}
+
+	return err
+}
+
 func evalCallExprCallable(expr *ast.CallExpr, context Context, methodCallable Callable) (val interface{}, err error) {
 	var args []interface{}
 	if len(expr.Args) == 0 {
