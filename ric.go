@@ -6,12 +6,18 @@ import (
 	"go/parser"
 	"go/token"
 
+	"github.com/golang/glog"
+
 	"github.com/complyue/hbigo/pkg/errors"
 )
 
 func RunInContext(scriptName, code string, context interface{}) (val interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
+			glog.Errorf(`Error running code in context:
+-*-%s-*-
+%s
+=*-%s-*=`, scriptName, code, scriptName)
 			err = errors.Errorf("Error run in context: %+v", r)
 		}
 	}()
