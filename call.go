@@ -176,6 +176,13 @@ func evalCallExprReflect(expr *ast.CallExpr, context Context, method reflect.Val
 				break
 			}
 			rVal := reflect.ValueOf(v)
+
+			if !rVal.IsValid() {
+				// reflect's zero Value causes panic on Call, must translated to zero value of expected arg type
+				args[key] = reflect.New(mType.In(key)).Elem()
+				continue
+			}
+
 			var tArg reflect.Type //Method argument type
 
 			//If true we are in the variadic parameters
