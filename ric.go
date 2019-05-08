@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang/glog"
 
-	"github.com/complyue/hbigo/pkg/errors"
+	"github.com/complyue/goScript/errors"
 )
 
 func RunInContext(scriptName, code string, context interface{}) (val interface{}, err error) {
@@ -18,14 +18,14 @@ func RunInContext(scriptName, code string, context interface{}) (val interface{}
 -*-%s-*-
 %s
 =*-%s-*=`, scriptName, code, scriptName)
-			err = errors.Errorf("Error run in context: %+v", r)
+			err = errors.Errorf("Error run in context: %+v", errors.RichError(r))
 		}
 	}()
 
 	ctxt := createContext(context)
 
 	pf, err := parser.ParseFile(&token.FileSet{}, scriptName, fmt.Sprintf(`
-package hbi
+package ric
 func init() {
 %s
 }
